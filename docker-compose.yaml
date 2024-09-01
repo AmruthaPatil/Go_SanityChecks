@@ -1,0 +1,50 @@
+version: '3.8'  # Updated to the latest version to remove the warning
+
+services:
+  arangodb:
+    image: arangodb
+    ports:
+      - "8529:8529"
+    environment:
+      - ARANGO_ROOT_PASSWORD=rootpassword
+    volumes:
+      - arangodb-data:/var/lib/arangodb3
+    networks:
+      - db-net
+
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=yourpassword
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - db-net
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - db-net
+
+  sanity-check:
+    build: .
+    depends_on:
+      arangodb:
+        condition: service_started
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - db-net
+
+volumes:
+  arangodb-data:
+  postgres-data:
+
+networks:
+  db-net:
